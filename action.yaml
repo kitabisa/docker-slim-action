@@ -1,0 +1,24 @@
+name: "docker-slim GitHub Action"
+description: "Minify container image by up to 30x (and for compiled languages even more) making it secure too!"
+author: "Dwi Siswanto"
+
+branding:
+  icon: "box"
+  color: "blue"
+
+runs:
+  using: "node16"
+  main: "dist/index.js"
+
+inputs:
+  target:
+    description: "Target container image (name or ID)"
+    required: true
+  tag:
+    description: "Specify a tag for slimmed target container image"
+    required: false
+    default: "slim"
+  overwrite:
+    description: "Overwrite target container image with slimmed version (only if target is not ID)"
+    required: false
+    default: false
