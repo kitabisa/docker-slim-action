@@ -1,0 +1,50 @@
+name: docker-slim test
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'dist/*.js'
+
+env:
+  IMAGE: "kitabisa/debian"
+  TAG: "jessie"
+
+jobs:
+  docker-slim:
+    strategy:
+      matrix:
+        overwrite: [true, false]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checking out repository
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          file: test/Dockerfile
+          push: false
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          context: test/
+
+      - name: Before
+        run: docker image ls "${{ env.IMAGE }}"
+
+      - name: docker-slim
+        uses: kitabisa/docker-slim-action@master
+        id: slim
+        env:
+          DSLIM_HTTP_PROBE: false
+        with:
+          target: ${{ env.IMAGE }}:${{ env.TAG }}
+          overwrite: ${{ matrix.overwrite }}
+
+      - name: After
+        run: docker image ls "${{ env.IMAGE }}"
+
+      - name: Report
+        env:
+          REPORT: ${{ steps.slim.outputs.report }} # report is JSON format
+        run: echo "${REPORT}"
