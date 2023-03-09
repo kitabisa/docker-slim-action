@@ -39,7 +39,7 @@ Create a workflow file in your repository and add these steps to your job:
       - run: docker image push "${{ github.repository }}" --all-tags
 ```
 
-In this example, it will minify `${{ github.repository }}:latest` as target and will create a slimmed version of the target image with the **slim** tag from the input (`${{ env.REPO }}:slim`) then push the images to the registry.
+In this example, it will minify `${{ github.repository }}:latest` as target and will create a slimmed version of the target image with the **slim** tag from the input (`${{ github.repository }}:slim`) then push the images to the registry.
 
 ## Inputs
 
