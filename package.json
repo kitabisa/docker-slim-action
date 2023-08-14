@@ -1,6 +1,6 @@
 {
-  "name": "docker-slim-actions",
-  "version": "1.0.0",
+  "name": "docker-slim-action",
+  "version": "1.0.1",
   "description": "Minify container image by up to 30x (and for compiled languages even more) making it secure too!",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kitabisa/docker-slim-actions.git"
+    "url": "git+https://github.com/kitabisa/docker-slim-action.git"
   },
   "keywords": [
     "docker",
@@ -21,9 +21,9 @@
   "author": "dwisiswant0",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kitabisa/docker-slim-actions/issues"
+    "url": "https://github.com/kitabisa/docker-slim-action/issues"
   },
-  "homepage": "https://github.com/kitabisa/docker-slim-actions#readme",
+  "homepage": "https://github.com/kitabisa/docker-slim-action#readme",
   "devDependencies": {
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
