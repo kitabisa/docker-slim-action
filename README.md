@@ -52,7 +52,8 @@ The following input actions are supported:
 | `target`    | Target container image (name or ID)                                              | 🟢        | string  |         |
 | `version`   | Define Slim version                                                              | 🔴        | string  |         |
 
-> **Warning**: Enabling the `overwrite` option will result in the replacement of the target image (original) with its slimmed version, regardless of the `tag` input.
+> **Warning**
+> Enabling the `overwrite` option will result in the replacement of the target image (original) with its slimmed version, regardless of the `tag` input.
 
 <details>
   <summary>You can also control the behavior of the Slim build command by setting the following environment variables:</summary>
