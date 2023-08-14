@@ -43,7 +43,7 @@ async function get_slim() {
     if (inputVersion == "" || inputVersion == "latest") {
       VER = response[0].tag_name;
     } else {
-      VER = inputTag;
+      VER = inputVersion;
     }
   } catch {
     throw new Error('ERROR! Could not retrieve the current Slim version number.');

@@ -48,7 +48,7 @@ function get_slim() {
                 VER = response[0].tag_name;
             }
             else {
-                VER = inputTag;
+                VER = inputVersion;
             }
         }
         catch (_a) {
