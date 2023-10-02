@@ -1,6 +1,6 @@
 {
-  "name": "docker-slim-action",
-  "version": "1.0.1",
+  "name": "@kitabisa/docker-slim-action",
+  "version": "1.0.3",
   "description": "Minify container image by up to 30x (and for compiled languages even more) making it secure too!",
   "main": "dist/index.js",
   "scripts": {
