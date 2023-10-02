@@ -13,7 +13,7 @@ const const_1 = require("./const");
 const inputOverwrite = const_1.core.getBooleanInput('overwrite', { required: false });
 const inputTarget = const_1.core.getInput('target', { required: true });
 const inputVersion = const_1.core.getInput('version', { required: false });
-let inputTag = const_1.core.getInput('tag', { required: false });
+let inputTag = const_1.core.getInput('tag', { required: true });
 let SLIM_PATH = '';
 function get_slim() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -129,7 +129,12 @@ function run() {
         const_1.core.debug('Downloading slim');
         yield get_slim();
         const_1.core.info(`slim on target: ${inputTarget}`);
-        yield const_1.shell.exec('slim', ['b', '--target', inputTarget, '--continue-after', '1'], { cwd: SLIM_PATH });
+        let args = ['b', '--target', inputTarget];
+        if (process.env['DSLIM_HTTP_PROBE_OFF'] == 'true' || process.env['DSLIM_HTTP_PROBE'] == 'false') {
+            if (typeof process.env['DSLIM_CONTINUE_AFTER'] === 'undefined')
+                args.push('--continue-after', '1');
+        }
+        yield const_1.shell.exec('slim', args, { cwd: SLIM_PATH });
         const data = const_1.fs.readFileSync(const_1.path.join(SLIM_PATH, 'slim.report.json'));
         const report = JSON.parse(data);
         const_1.core.setOutput('report', report);
