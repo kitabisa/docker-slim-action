@@ -6,7 +6,7 @@ import {
 const inputOverwrite = core.getBooleanInput('overwrite', {required: false});
 const inputTarget = core.getInput('target', {required: true});
 const inputVersion = core.getInput('version', {required: false});
-let inputTag = core.getInput('tag', {required: false});
+let inputTag = core.getInput('tag', {required: true});
 
 let SLIM_PATH = '';
 

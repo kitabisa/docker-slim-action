@@ -48,7 +48,7 @@ The following input actions are supported:
 | Name        | Description                                                                      | Required? | Type    | Default |
 |-------------|----------------------------------------------------------------------------------|-----------|---------|---------|
 | `overwrite` | Overwrite target container image with slimmed version (only if target is not ID) | 🔴        | boolean | false   |
-| `tag`       | Specify a tag for slimmed target container image                                 | 🔴        | string  | slim    |
+| `tag`       | Specify a tag for slimmed target container image                                 | 🟢        | string  | slim    |
 | `target`    | Target container image (name or ID)                                              | 🟢        | string  |         |
 | `version`   | Define Slim version                                                              | 🔴        | string  |         |
 

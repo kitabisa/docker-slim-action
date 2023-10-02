@@ -18,7 +18,7 @@ inputs:
     required: true
   tag:
     description: "Specify a tag for slimmed target container image"
-    required: false
+    required: true
     default: "slim"
   overwrite:
     description: "Overwrite target container image with slimmed version (only if target is not ID)"
