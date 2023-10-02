@@ -126,7 +126,13 @@ async function run() {
 
   core.info(`slim on target: ${inputTarget}`);
 
-  await shell.exec('slim', ['b', '--target', inputTarget], {cwd: SLIM_PATH});
+  let args = ['b', '--target', inputTarget];
+
+  if (process.env['DSLIM_HTTP_PROBE_OFF'] == 'true' || process.env['DSLIM_HTTP_PROBE'] == 'false') {
+    if (typeof process.env['DSLIM_CONTINUE_AFTER'] === 'undefined') args.push('--continue-after', '1')
+  }
+
+  await shell.exec('slim', args, {cwd: SLIM_PATH});
 
   const data = fs.readFileSync(path.join(SLIM_PATH, 'slim.report.json'));
   const report = JSON.parse(data);
