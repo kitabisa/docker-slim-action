@@ -52,7 +52,7 @@ function get_slim() {
             }
         }
         catch (_a) {
-            throw new Error('ERROR! Could not retrieve the current Slim version number.');
+            throw new Error(`ERROR! Could not get the Slim version ${VER}.`);
         }
         URL = `https://downloads.dockerslim.com/releases/${VER}`;
         // Get kernel name and machine architecture.
@@ -89,39 +89,61 @@ function get_slim() {
         }
         // Derive the filename
         FILENAME = `dist_${DIST}.${EXT}`;
-        const file = const_1.fs.createWriteStream(const_1.path.join(const_1.TMP_DIR, FILENAME));
-        yield new Promise((resolve, reject) => {
-            const_1.https.get(`${URL}/${FILENAME}`, (response) => {
-                response.pipe(file);
-                file.on('finish', () => {
-                    file.close();
-                    resolve(file);
+        // Get the bin from cache
+        const cachePrefix = `slim-${VER}`;
+        const cacheKey = `${cachePrefix}-${DIST}`;
+        const cachePath = const_1.path.join('/tmp', cacheKey);
+        try {
+            const_1.core.debug('Restoring cache');
+            const cacheResult = yield const_1.cache.restoreCache([cachePath], cacheKey, [`${cachePrefix}-`]);
+            if (typeof cacheResult === 'undefined') {
+                throw new Error(`ERROR! Cache miss: ${cacheKey} was not found in the cache.`);
+            }
+            const_1.core.debug(`${cacheKey} cache was restored.`);
+            SLIM_PATH = cachePath;
+        }
+        catch (e) {
+            const_1.core.error(e);
+            const file = const_1.fs.createWriteStream(const_1.path.join(const_1.TMP_DIR, FILENAME));
+            yield new Promise((resolve, reject) => {
+                const_1.https.get(`${URL}/${FILENAME}`, (response) => {
+                    response.pipe(file);
+                    file.on('finish', () => {
+                        file.close();
+                        resolve(file);
+                    });
+                }).on('error', (error) => {
+                    const_1.fs.unlinkSync(const_1.path.join(const_1.TMP_DIR, FILENAME));
+                    reject(error);
                 });
-            }).on('error', (error) => {
-                const_1.fs.unlinkSync(const_1.path.join(const_1.TMP_DIR, FILENAME));
-                reject(error);
             });
-        });
-        const_1.core.debug(`Unpacking ${const_1.path.join(const_1.TMP_DIR, FILENAME)}`);
-        if (EXT === 'zip') {
-            const extract = require('extract-zip');
-            yield extract(const_1.path.join(const_1.TMP_DIR, FILENAME), {
-                dir: const_1.TMP_DIR
-            });
+            const_1.core.debug(`Unpacking ${const_1.path.join(const_1.TMP_DIR, FILENAME)}`);
+            if (EXT === 'zip') {
+                const extract = require('extract-zip');
+                yield extract(const_1.path.join(const_1.TMP_DIR, FILENAME), {
+                    dir: const_1.TMP_DIR
+                });
+            }
+            else if (EXT === 'tar.gz') {
+                const tar = require('tar');
+                yield tar.x({
+                    file: const_1.path.join(const_1.TMP_DIR, FILENAME),
+                    cwd: const_1.TMP_DIR
+                });
+            }
+            else {
+                throw new Error('ERROR! Unexpected file extension.');
+            }
+            SLIM_PATH = const_1.path.join(const_1.TMP_DIR, `dist_${DIST}`);
+            const_1.core.debug(`Copying ${SLIM_PATH} -> (${cachePath})`);
+            yield const_1.io.cp(SLIM_PATH, cachePath, { recursive: true, force: true });
+            const cacheId = yield const_1.cache.saveCache([cachePath], cacheKey);
+            const_1.core.debug(`${cacheKey} cache saved (ID: ${cacheId})`);
         }
-        else if (EXT === 'tar.gz') {
-            const tar = require('tar');
-            yield tar.x({
-                file: const_1.path.join(const_1.TMP_DIR, FILENAME),
-                cwd: const_1.TMP_DIR
-            });
+        finally {
+            const_1.core.addPath(SLIM_PATH);
+            const_1.core.info(`Using slim version ${VER}`);
         }
-        else {
-            throw new Error('ERROR! Unexpected file extension.');
-        }
-        SLIM_PATH = const_1.path.join(const_1.TMP_DIR, `dist_${DIST}`);
-        const_1.core.addPath(SLIM_PATH);
-        const_1.core.info(`Using slim version ${VER}`);
     });
 }
 function run() {
