@@ -46,7 +46,7 @@ async function get_slim() {
       VER = inputVersion;
     }
   } catch {
-    throw new Error(`ERROR! Could not get the Slim version ${VER}.`);
+    throw new Error(`Could not get the Slim version ${VER}.`);
   }
   
   URL = `https://downloads.dockerslim.com/releases/${VER}`;
@@ -73,12 +73,12 @@ async function get_slim() {
       DIST = 'mac_m1';
     }
   } else {
-    throw new Error(`ERROR! ${KERNEL} is not a supported platform.`);
+    throw new Error(`${KERNEL} is not a supported platform.`);
   }
 
   // Was a known distribution detected?
   if (!DIST) {
-    throw new Error(`ERROR! ${MACHINE} is not a supported architecture.`);
+    throw new Error(`${MACHINE} is not a supported architecture.`);
   }
 
   // Derive the filename
@@ -96,7 +96,7 @@ async function get_slim() {
     );
 
     if (typeof cacheResult === 'undefined') {
-      throw new Error(`ERROR! Cache miss: ${cacheKey} was not found in the cache.`)
+      throw new Error(`Cache miss: ${cacheKey} was not found in the cache.`)
     }
 
     core.debug(`${cacheKey} cache was restored.`)
@@ -132,7 +132,7 @@ async function get_slim() {
         cwd: TMP_DIR
       });
     } else {
-      throw new Error('ERROR! Unexpected file extension.');
+      throw new Error('Unexpected file extension.');
     }
 
     SLIM_PATH = path.join(TMP_DIR, `dist_${DIST}`);
@@ -168,7 +168,7 @@ async function run() {
   core.setOutput('report', report);
 
   if (report.state == 'error') {
-    throw new Error('ERROR! Cannot build over target');
+    throw new Error('Cannot build over target');
   }
 
   const [image, tag] = report.target_reference.split(':');
@@ -185,7 +185,7 @@ async function run() {
 }
 
 if (inputTag == "") {
-  core.setFailed('ERROR! Tag cannot be empty.');
+  core.setFailed('Tag cannot be empty.');
 }
 
 try {

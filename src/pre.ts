@@ -4,5 +4,5 @@ try {
   io.which('docker', true);
   core.info('docker command OK!');
 } catch {
-  core.setFailed('ERROR! docker: command not found');
+  core.setFailed('docker: command not found');
 }

@@ -6,5 +6,5 @@ try {
     const_1.core.info('docker command OK!');
 }
 catch (_a) {
-    const_1.core.setFailed('ERROR! docker: command not found');
+    const_1.core.setFailed('docker: command not found');
 }

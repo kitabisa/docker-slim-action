@@ -52,7 +52,7 @@ function get_slim() {
             }
         }
         catch (_a) {
-            throw new Error(`ERROR! Could not get the Slim version ${VER}.`);
+            throw new Error(`Could not get the Slim version ${VER}.`);
         }
         URL = `https://downloads.dockerslim.com/releases/${VER}`;
         // Get kernel name and machine architecture.
@@ -81,11 +81,11 @@ function get_slim() {
             }
         }
         else {
-            throw new Error(`ERROR! ${KERNEL} is not a supported platform.`);
+            throw new Error(`${KERNEL} is not a supported platform.`);
         }
         // Was a known distribution detected?
         if (!DIST) {
-            throw new Error(`ERROR! ${MACHINE} is not a supported architecture.`);
+            throw new Error(`${MACHINE} is not a supported architecture.`);
         }
         // Derive the filename
         FILENAME = `dist_${DIST}.${EXT}`;
@@ -97,7 +97,7 @@ function get_slim() {
             const_1.core.debug('Restoring cache');
             const cacheResult = yield const_1.cache.restoreCache([cachePath], cacheKey, [`${cachePrefix}-`]);
             if (typeof cacheResult === 'undefined') {
-                throw new Error(`ERROR! Cache miss: ${cacheKey} was not found in the cache.`);
+                throw new Error(`Cache miss: ${cacheKey} was not found in the cache.`);
             }
             const_1.core.debug(`${cacheKey} cache was restored.`);
             SLIM_PATH = cachePath;
@@ -132,7 +132,7 @@ function get_slim() {
                 });
             }
             else {
-                throw new Error('ERROR! Unexpected file extension.');
+                throw new Error('Unexpected file extension.');
             }
             SLIM_PATH = const_1.path.join(const_1.TMP_DIR, `dist_${DIST}`);
             const_1.core.debug(`Copying ${SLIM_PATH} -> (${cachePath})`);
@@ -161,7 +161,7 @@ function run() {
         const report = JSON.parse(data);
         const_1.core.setOutput('report', report);
         if (report.state == 'error') {
-            throw new Error('ERROR! Cannot build over target');
+            throw new Error('Cannot build over target');
         }
         const [image, tag] = report.target_reference.split(':');
         if (inputOverwrite && tag) {
@@ -174,7 +174,7 @@ function run() {
     });
 }
 if (inputTag == "") {
-    const_1.core.setFailed('ERROR! Tag cannot be empty.');
+    const_1.core.setFailed('Tag cannot be empty.');
 }
 try {
     run();
