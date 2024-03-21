@@ -1,3 +1,4 @@
+export const cache = require('@actions/cache');
 export const core = require('@actions/core');
 export const fs = require('fs');
 export const https = require('https');
