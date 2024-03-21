@@ -90,6 +90,7 @@ async function get_slim() {
   const cachePath = path.join('/tmp', cacheKey);
 
   try {
+    core.debug('Restoring cache');
     const cacheResult = await cache.restoreCache(
       [ cachePath ], cacheKey, [ `${cachePrefix}-` ]
     );
@@ -102,6 +103,8 @@ async function get_slim() {
 
     SLIM_PATH = cachePath;
   } catch (e) {
+    core.error(e);
+
     const file = fs.createWriteStream(path.join(TMP_DIR, FILENAME));
     await new Promise((resolve, reject) => {
       https.get(`${URL}/${FILENAME}`, (response) => {
