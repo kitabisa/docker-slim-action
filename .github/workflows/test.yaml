@@ -3,7 +3,8 @@ name: docker-slim test
 on:
   push:
     branches:
-      - master
+      - 'master'
+      - '*dev'
     paths:
       - 'dist/*.js'
   pull_request:
