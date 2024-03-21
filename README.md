@@ -202,8 +202,8 @@ The following input actions are supported:
 | `DSLIM_HTTP_PROBE_API_SPEC_FILE` | Run HTTP probes for API spec from file |
 </details>
 
-> [!CAUTION]
-> Please note that when you disable HTTP probing (either by setting `DSLIM_HTTP_PROBE_OFF` to `true` or `DSLIM_HTTP_PROBE` to `false`), it will effectively modify the behavior of the continue mode (if the `DSLIM_CONTINUE_AFTER` value is undefined) by imposing a timeout of **1** second. This adjustment occurs because, by default, when HTTP probes are disabled, the Slim's behavior will switch to '**enter**' mode — and there is no way to interact with the temporary container created by Slim within the GitHub Action runner.
+> [!IMPORTANT]
+> Please note that when you disable HTTP probing (either by setting **`DSLIM_HTTP_PROBE_OFF`** to **`true`** or **`DSLIM_HTTP_PROBE`** to **`false`**), it will effectively modify the behavior of the continue mode (if the **`DSLIM_CONTINUE_AFTER`** value is undefined) by imposing a timeout of **1** second. This adjustment occurs because, by default, when HTTP probes are disabled, the Slim's behavior will switch to '**enter**' mode — and there is no way to interact with the temporary container created by Slim within the GitHub Action runner.
 
 ## Outputs
 
