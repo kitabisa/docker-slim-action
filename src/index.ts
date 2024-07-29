@@ -55,7 +55,7 @@ async function get_slim() {
   KERNEL = os.platform();
   MACHINE = os.arch();
 
-  // Determine the target distrubution
+  // Determine the target distribution
   if (KERNEL === 'linux') {
     EXT = 'tar.gz';
     if (MACHINE === 'x64') {
