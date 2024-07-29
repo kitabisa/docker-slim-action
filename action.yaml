@@ -23,7 +23,7 @@ inputs:
   overwrite:
     description: "Overwrite target container image with slimmed version (only if target is not ID)"
     required: false
-    default: false
+    default: "false"
   version:
     description: "Define Slim version"
     required: false
