@@ -7,7 +7,7 @@ branding:
   color: "blue"
 
 runs:
-  using: "node16"
+  using: "node20"
   pre: "dist/pre.js"
   main: "dist/index.js"
   post: "dist/post.js"
