@@ -129,7 +129,8 @@ async function get_slim() {
       const tar = require('tar');
       await tar.x({
         file: path.join(TMP_DIR, FILENAME),
-        cwd: TMP_DIR
+        cwd: TMP_DIR,
+        gzip: true
       });
     } else {
       throw new Error('Unexpected file extension.');

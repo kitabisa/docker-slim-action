@@ -128,7 +128,8 @@ function get_slim() {
                 const tar = require('tar');
                 yield tar.x({
                     file: const_1.path.join(const_1.TMP_DIR, FILENAME),
-                    cwd: const_1.TMP_DIR
+                    cwd: const_1.TMP_DIR,
+                    gzip: true
                 });
             }
             else {
