@@ -14,7 +14,6 @@ const inputOverwrite = const_1.core.getBooleanInput('overwrite', { required: fal
 const inputTarget = const_1.core.getInput('target', { required: true });
 const inputVersion = const_1.core.getInput('version', { required: false });
 let inputTag = const_1.core.getInput('tag', { required: true });
-let SLIM_PATH = '';
 function get_slim() {
     return __awaiter(this, void 0, void 0, function* () {
         let DIST = '';
@@ -54,7 +53,6 @@ function get_slim() {
         catch (_a) {
             throw new Error(`Could not get the Slim version ${VER}.`);
         }
-        URL = `https://github.com/slimtoolkit/slim/releases/download/${VER}`;
         // Get kernel name and machine architecture.
         KERNEL = const_1.os.platform();
         MACHINE = const_1.os.arch();
@@ -89,62 +87,41 @@ function get_slim() {
         }
         // Derive the filename
         FILENAME = `dist_${DIST}.${EXT}`;
-        // Get the bin from cache
-        const cachePrefix = `slim-${VER}`;
-        const cacheKey = `${cachePrefix}-${DIST}`;
-        const cachePath = const_1.path.join('/tmp', cacheKey);
-        try {
-            const_1.core.debug('Restoring cache');
-            const cacheResult = yield const_1.cache.restoreCache([cachePath], cacheKey, [`${cachePrefix}-`]);
-            if (typeof cacheResult === 'undefined') {
-                throw new Error(`Cache miss: ${cacheKey} was not found in the cache.`);
-            }
-            const_1.core.debug(`${cacheKey} cache was restored.`);
-            SLIM_PATH = cachePath;
+        URL = `https://github.com/slimtoolkit/slim/releases/download/${VER}/${FILENAME}`;
+        const_1.core.debug(`Checking cache for slim...`);
+        let slimPath = const_1.tc.find('slim', VER, MACHINE);
+        if (slimPath) {
+            const_1.core.notice(`slim ${VER} found in cache`);
         }
-        catch (e) {
-            const_1.core.error(e);
-            const file = const_1.fs.createWriteStream(const_1.path.join(const_1.TMP_DIR, FILENAME));
-            yield new Promise((resolve, reject) => {
-                const_1.https.get(`${URL}/${FILENAME}`, (response) => {
-                    response.pipe(file);
-                    file.on('finish', () => {
-                        file.close();
-                        resolve(file);
-                    });
-                }).on('error', (error) => {
-                    const_1.fs.unlinkSync(const_1.path.join(const_1.TMP_DIR, FILENAME));
-                    reject(error);
-                });
-            });
-            const_1.core.debug(`Unpacking ${const_1.path.join(const_1.TMP_DIR, FILENAME)}`);
-            if (EXT === 'zip') {
-                const extract = require('extract-zip');
-                yield extract(const_1.path.join(const_1.TMP_DIR, FILENAME), {
-                    dir: const_1.TMP_DIR
-                });
+        else {
+            slimPath = const_1.path.join(process.env.GITHUB_WORKSPACE, '../', 'slim');
+            let srcPath;
+            try {
+                const_1.core.debug(`Downloading slim ${VER} for ${KERNEL}/${MACHINE}...`);
+                srcPath = yield const_1.tc.downloadTool(URL);
             }
-            else if (EXT === 'tar.gz') {
-                const tar = require('tar');
-                yield tar.x({
-                    file: const_1.path.join(const_1.TMP_DIR, FILENAME),
-                    cwd: const_1.TMP_DIR,
-                    gzip: true
-                });
+            catch (error) {
+                throw new Error(`Could not download slim: ${error.message}`);
             }
-            else {
-                throw new Error('Unexpected file extension.');
+            let extractedPath;
+            try {
+                const_1.core.debug(`Extracting slim ${VER}...`);
+                if (EXT === 'zip') {
+                    extractedPath = yield const_1.tc.extractZip(srcPath, slimPath);
+                }
+                else { // tar.gz
+                    extractedPath = yield const_1.tc.extractTar(srcPath, slimPath);
+                }
             }
-            SLIM_PATH = const_1.path.join(const_1.TMP_DIR, `dist_${DIST}`);
-            const_1.core.debug(`Copying ${SLIM_PATH} -> (${cachePath})`);
-            yield const_1.io.cp(SLIM_PATH, cachePath, { recursive: true, force: true });
-            const cacheId = yield const_1.cache.saveCache([cachePath], cacheKey);
-            const_1.core.debug(`${cacheKey} cache saved (ID: ${cacheId})`);
+            catch (error) {
+                throw new Error(`Could not extract slim: ${error.message}`);
+            }
+            const_1.core.debug('Caching slim...');
+            slimPath = yield const_1.tc.cacheDir(extractedPath, 'slim', VER, MACHINE);
         }
-        finally {
-            const_1.core.addPath(SLIM_PATH);
-            const_1.core.info(`Using slim version ${VER}`);
-        }
+        const_1.core.debug('Adding slim to PATH...');
+        const_1.core.addPath(slimPath);
+        const_1.core.info(`slim ${VER} has been installed successfully`);
     });
 }
 function run() {
@@ -157,8 +134,8 @@ function run() {
             if (typeof process.env['DSLIM_CONTINUE_AFTER'] === 'undefined')
                 args.push('--continue-after', '1');
         }
-        yield const_1.shell.exec('slim', args, { cwd: SLIM_PATH });
-        const data = const_1.fs.readFileSync(const_1.path.join(SLIM_PATH, 'slim.report.json'));
+        yield const_1.shell.exec('slim', args, { cwd: const_1.TMP_DIR });
+        const data = const_1.fs.readFileSync(const_1.path.join(const_1.TMP_DIR, 'slim.report.json'));
         const report = JSON.parse(data);
         const_1.core.setOutput('report', report);
         if (report.state == 'error') {

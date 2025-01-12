@@ -1,14 +1,13 @@
 import {
-  cache, core, fs, https, io,
-  os, path, shell, TMP_DIR
+  core, fs, https,
+  os, path, shell,
+  tc, TMP_DIR
 } from './const';
 
 const inputOverwrite = core.getBooleanInput('overwrite', {required: false});
 const inputTarget = core.getInput('target', {required: true});
 const inputVersion = core.getInput('version', {required: false});
 let inputTag = core.getInput('tag', {required: true});
-
-let SLIM_PATH = '';
 
 async function get_slim() {
   let DIST = '';
@@ -48,8 +47,6 @@ async function get_slim() {
   } catch {
     throw new Error(`Could not get the Slim version ${VER}.`);
   }
-  
-  URL = `https://github.com/slimtoolkit/slim/releases/download/${VER}`;
 
   // Get kernel name and machine architecture.
   KERNEL = os.platform();
@@ -83,70 +80,43 @@ async function get_slim() {
 
   // Derive the filename
   FILENAME = `dist_${DIST}.${EXT}`;
+  URL = `https://github.com/slimtoolkit/slim/releases/download/${VER}/${FILENAME}`;
 
-  // Get the bin from cache
-  const cachePrefix = `slim-${VER}`;
-  const cacheKey = `${cachePrefix}-${DIST}`;
-  const cachePath = path.join('/tmp', cacheKey);
+  core.debug(`Checking cache for slim...`)
+  let slimPath = tc.find('slim', VER, MACHINE)
 
-  try {
-    core.debug('Restoring cache');
-    const cacheResult = await cache.restoreCache(
-      [ cachePath ], cacheKey, [ `${cachePrefix}-` ]
-    );
+  if (slimPath) {
+    core.notice(`slim ${VER} found in cache`)
+  } else {
+    slimPath = path.join(process.env.GITHUB_WORKSPACE, '../', 'slim')
 
-    if (typeof cacheResult === 'undefined') {
-      throw new Error(`Cache miss: ${cacheKey} was not found in the cache.`)
+    let srcPath
+    try {
+      core.debug(`Downloading slim ${VER} for ${KERNEL}/${MACHINE}...`)
+      srcPath = await tc.downloadTool(URL)
+    } catch (error) {
+      throw new Error(`Could not download slim: ${error.message}`)
     }
 
-    core.debug(`${cacheKey} cache was restored.`)
-
-    SLIM_PATH = cachePath;
-  } catch (e) {
-    core.error(e);
-
-    const file = fs.createWriteStream(path.join(TMP_DIR, FILENAME));
-    await new Promise((resolve, reject) => {
-      https.get(`${URL}/${FILENAME}`, (response) => {
-        response.pipe(file);
-        file.on('finish', () => {
-          file.close();
-          resolve(file);
-        });
-      }).on('error', (error) => {
-        fs.unlinkSync(path.join(TMP_DIR, FILENAME));
-        reject(error);
-      });
-    });
-
-    core.debug(`Unpacking ${path.join(TMP_DIR, FILENAME)}`);
-    if (EXT === 'zip') {
-      const extract = require('extract-zip');
-      await extract(path.join(TMP_DIR, FILENAME), {
-        dir: TMP_DIR
-      });
-    } else if (EXT === 'tar.gz') {
-      const tar = require('tar');
-      await tar.x({
-        file: path.join(TMP_DIR, FILENAME),
-        cwd: TMP_DIR,
-        gzip: true
-      });
-    } else {
-      throw new Error('Unexpected file extension.');
+    let extractedPath
+    try {
+      core.debug(`Extracting slim ${VER}...`)
+      if (EXT === 'zip') {
+        extractedPath = await tc.extractZip(srcPath, slimPath)
+      } else { // tar.gz
+        extractedPath = await tc.extractTar(srcPath, slimPath)
+      }
+    } catch (error) {
+      throw new Error(`Could not extract slim: ${error.message}`)
     }
 
-    SLIM_PATH = path.join(TMP_DIR, `dist_${DIST}`);
-
-    core.debug(`Copying ${SLIM_PATH} -> (${cachePath})`);
-    await io.cp(SLIM_PATH, cachePath, { recursive: true, force: true });
-
-    const cacheId = await cache.saveCache([ cachePath ], cacheKey);
-    core.debug(`${cacheKey} cache saved (ID: ${cacheId})`);
-  } finally {
-    core.addPath(SLIM_PATH);
-    core.info(`Using slim version ${VER}`);
+    core.debug('Caching slim...')
+    slimPath = await tc.cacheDir(extractedPath, 'slim', VER, MACHINE)
   }
+
+  core.debug('Adding slim to PATH...')
+  core.addPath(slimPath)
+  core.info(`slim ${VER} has been installed successfully`)
 }
 
 async function run() {
@@ -161,9 +131,9 @@ async function run() {
     if (typeof process.env['DSLIM_CONTINUE_AFTER'] === 'undefined') args.push('--continue-after', '1')
   }
 
-  await shell.exec('slim', args, {cwd: SLIM_PATH});
+  await shell.exec('slim', args, {cwd: TMP_DIR});
 
-  const data = fs.readFileSync(path.join(SLIM_PATH, 'slim.report.json'));
+  const data = fs.readFileSync(path.join(TMP_DIR, 'slim.report.json'));
   const report = JSON.parse(data);
 
   core.setOutput('report', report);
