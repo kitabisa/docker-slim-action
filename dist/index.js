@@ -54,11 +54,11 @@ function get_slim() {
         catch (_a) {
             throw new Error(`Could not get the Slim version ${VER}.`);
         }
-        URL = `https://downloads.dockerslim.com/releases/${VER}`;
+        URL = `https://github.com/slimtoolkit/slim/releases/download/${VER}`;
         // Get kernel name and machine architecture.
         KERNEL = const_1.os.platform();
         MACHINE = const_1.os.arch();
-        // Determine the target distrubution
+        // Determine the target distribution
         if (KERNEL === 'linux') {
             EXT = 'tar.gz';
             if (MACHINE === 'x64') {
