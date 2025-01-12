@@ -36,6 +36,7 @@
     "tar": "^6.1.13"
   },
   "dependencies": {
-    "@actions/cache": "^3.2.4"
+    "@actions/cache": "^3.2.4",
+    "@types/node": "^22.10.5"
   }
 }

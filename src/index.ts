@@ -49,7 +49,7 @@ async function get_slim() {
     throw new Error(`Could not get the Slim version ${VER}.`);
   }
   
-  URL = `https://downloads.dockerslim.com/releases/${VER}`;
+  URL = `https://github.com/slimtoolkit/slim/releases/download/${VER}`;
 
   // Get kernel name and machine architecture.
   KERNEL = os.platform();
