@@ -16,7 +16,7 @@ const inputVersion = const_1.core.getInput('version', { required: false });
 let inputTag = const_1.core.getInput('tag', { required: true });
 function get_slim() {
     return __awaiter(this, void 0, void 0, function* () {
-        let DIST = '';
+        let DIST = 'dist_';
         let EXT = '';
         let FILENAME = '';
         let KERNEL = '';
@@ -60,33 +60,33 @@ function get_slim() {
         if (KERNEL === 'linux') {
             EXT = 'tar.gz';
             if (MACHINE === 'x64') {
-                DIST = 'linux';
+                DIST += 'linux';
             }
             else if (MACHINE === 'arm') {
-                DIST = 'linux_arm';
+                DIST += 'linux_arm';
             }
             else if (MACHINE === 'arm64') {
-                DIST = 'linux_arm64';
+                DIST += 'linux_arm64';
             }
         }
         else if (KERNEL === 'darwin') {
             EXT = 'zip';
             if (MACHINE === 'x64') {
-                DIST = 'mac';
+                DIST += 'mac';
             }
             else if (MACHINE === 'arm64') {
-                DIST = 'mac_m1';
+                DIST += 'mac_m1';
             }
         }
         else {
             throw new Error(`${KERNEL} is not a supported platform.`);
         }
         // Was a known distribution detected?
-        if (!DIST) {
+        if (DIST == 'dist_') {
             throw new Error(`${MACHINE} is not a supported architecture.`);
         }
         // Derive the filename
-        FILENAME = `dist_${DIST}.${EXT}`;
+        FILENAME = `${DIST}.${EXT}`;
         URL = `https://github.com/slimtoolkit/slim/releases/download/${VER}/${FILENAME}`;
         const_1.core.debug(`Checking cache for slim...`);
         let slimPath = const_1.tc.find('slim', VER, MACHINE);
