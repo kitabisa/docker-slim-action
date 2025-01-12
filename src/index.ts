@@ -88,7 +88,7 @@ async function get_slim() {
   if (slimPath) {
     core.notice(`slim ${VER} found in cache`)
   } else {
-    slimPath = path.join(process.env.GITHUB_WORKSPACE, '../', 'slim')
+    const parentWorkspace = path.join(process.env.GITHUB_WORKSPACE, '../')
 
     let srcPath
     try {
@@ -102,13 +102,14 @@ async function get_slim() {
     try {
       core.debug(`Extracting slim ${VER}...`)
       if (EXT === 'zip') {
-        extractedPath = await tc.extractZip(srcPath, slimPath)
+        extractedPath = await tc.extractZip(srcPath, parentWorkspace)
       } else { // tar.gz
-        extractedPath = await tc.extractTar(srcPath, slimPath)
+        extractedPath = await tc.extractTar(srcPath, parentWorkspace)
       }
     } catch (error) {
       throw new Error(`Could not extract slim: ${error.message}`)
     }
+    extractedPath = path.join(extractedPath, DIST)
 
     core.debug('Caching slim...')
     slimPath = await tc.cacheDir(extractedPath, 'slim', VER, MACHINE)

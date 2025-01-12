@@ -94,7 +94,7 @@ function get_slim() {
             const_1.core.notice(`slim ${VER} found in cache`);
         }
         else {
-            slimPath = const_1.path.join(process.env.GITHUB_WORKSPACE, '../', 'slim');
+            const parentWorkspace = const_1.path.join(process.env.GITHUB_WORKSPACE, '../');
             let srcPath;
             try {
                 const_1.core.debug(`Downloading slim ${VER} for ${KERNEL}/${MACHINE}...`);
@@ -107,15 +107,16 @@ function get_slim() {
             try {
                 const_1.core.debug(`Extracting slim ${VER}...`);
                 if (EXT === 'zip') {
-                    extractedPath = yield const_1.tc.extractZip(srcPath, slimPath);
+                    extractedPath = yield const_1.tc.extractZip(srcPath, parentWorkspace);
                 }
                 else { // tar.gz
-                    extractedPath = yield const_1.tc.extractTar(srcPath, slimPath);
+                    extractedPath = yield const_1.tc.extractTar(srcPath, parentWorkspace);
                 }
             }
             catch (error) {
                 throw new Error(`Could not extract slim: ${error.message}`);
             }
+            extractedPath = const_1.path.join(extractedPath, DIST);
             const_1.core.debug('Caching slim...');
             slimPath = yield const_1.tc.cacheDir(extractedPath, 'slim', VER, MACHINE);
         }
