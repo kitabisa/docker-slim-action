@@ -33,7 +33,7 @@
     "https": "^1.0.0",
     "os": "^0.1.2",
     "path": "^0.12.7",
-    "tar": "^6.1.13"
+    "tar": "^7.5.10"
   },
   "dependencies": {
     "@actions/tool-cache": "^2.0.1",
